@@ -1,0 +1,28 @@
+name: Public IP
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: "actions/checkout@v3"
+
+      - name: Public IP
+        id: ip
+        uses: "./"
+        with:
+          maxRetries: 10
+          ipv4Servers: |-
+            https://ipv4.seeip.org/jsonip
+            https://api.ipify.org?format=json
+          ipv6Servers: |-
+            https://api.ipify.org?format=json
+            https://ipv6.seeip.org/jsonip
+
+      - name: Print Public IP
+        run: |
+          echo ${{ steps.ip.outputs.ipv4 }}
+          echo ${{ steps.ip.outputs.ipv6 }}
+

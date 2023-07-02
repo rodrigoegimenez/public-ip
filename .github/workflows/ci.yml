@@ -20,7 +20,15 @@ jobs:
 
       - name: Public IP
         id: ip
-        uses: haythem/public-ip@v1.3
+        uses: './'
+        with:
+          maxRetries: 10
+          ipv4Servers: |-
+            https://api.ipify.org?format=json
+            https://ipv4.seeip.org/jsonip
+          ipv6Servers: |-
+            https://api.ipify.org?format=json
+            https://ipv6.seeip.org/jsonip
 
       - name: Restore Cache
         uses: actions/cache@v1

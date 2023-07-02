@@ -6,6 +6,18 @@ inputs:
     description: 'How many retries on the ipify apis before failing'
     default: '5'
     required: false
+  ipv4Servers:
+    description: |-
+      Comma-separated or newline-separated list of ipv4 servers to use.
+    required: false
+    default: |-
+      https://api.ipify.org?format=json
+  ipv6Servers:
+    description: |-
+      Comma-separated or newline-separated list of ipv6 servers to use.
+    required: false
+    default: |-
+      https://api64.ipify.org?format=json
 runs:
   using: 'node16'
   main: 'dist/index.js'

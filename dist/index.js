@@ -2729,6 +2729,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const http_client_1 = __nccwpck_require__(255);
+const parseList = (str) => str
+    .split(/\s|,/)
+    .map((elem) => elem.trim())
+    .filter((elem) => elem.length > 0);
+const getRandomElement = (arr) => arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
 /**
  * Action bootstrapper.
  *
@@ -2737,20 +2742,34 @@ const http_client_1 = __nccwpck_require__(255);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const maxRetries = parseInt(core.getInput("maxRetries"), 10);
+        const ipv4Servers = parseList(core.getInput("ipv4Servers"));
+        const ipv6Servers = parseList(core.getInput("ipv6Servers"));
         const http = new http_client_1.HttpClient("haythem/public-ip", undefined, {
             allowRetries: true,
-            maxRetries: maxRetries
+            maxRetries: maxRetries,
         });
-        try {
-            const ipv4 = yield http.getJson("https://api.ipify.org?format=json");
-            const ipv6 = yield http.getJson("https://api64.ipify.org?format=json");
-            core.setOutput("ipv4", ipv4.result.ip);
-            core.setOutput("ipv6", ipv6.result.ip);
-            core.info(`ipv4: ${ipv4.result.ip}`);
-            core.info(`ipv6: ${ipv6.result.ip}`);
-        }
-        catch (error) {
-            core.setFailed(error === null || error === void 0 ? void 0 : error.message);
+        let numTries = 0;
+        let success = false;
+        while (!success && numTries < maxRetries) {
+            console.log(success);
+            try {
+                const ipv4Server = getRandomElement(ipv4Servers);
+                const ipv6Server = getRandomElement(ipv6Servers);
+                const ipv4 = yield http.getJson(ipv4Server);
+                const ipv6 = yield http.getJson(ipv6Server);
+                core.setOutput("ipv4", ipv4.result.ip);
+                core.setOutput("ipv6", ipv6.result.ip);
+                core.info(`ipv4: ${ipv4.result.ip} server: ${ipv4Server}`);
+                core.info(`ipv6: ${ipv6.result.ip} server: ${ipv6Server}`);
+                success = true;
+                core.info("success");
+            }
+            catch (error) {
+                if (numTries == maxRetries - 1) {
+                    core.setFailed(error === null || error === void 0 ? void 0 : error.message);
+                }
+            }
+            numTries++;
         }
     });
 }
